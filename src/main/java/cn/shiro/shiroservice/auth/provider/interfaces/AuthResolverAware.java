@@ -10,6 +10,7 @@ import org.apache.shiro.authz.permission.RolePermissionResolverAware;
  * &#064;Time 2024 一月 星期五 09:22
  *
  * @author ShangGuan
+ * 继承该类设置权限和角色
  */
 public interface AuthResolverAware extends Authorizer, PermissionResolverAware, RolePermissionResolverAware {
 

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
  * &#064;Time 2023 十二月 星期四 14:14
  *
  * @author ShangGuan
+ * 一个简单的Realm
  */
 
 public class SimpleRealmImpl extends AbstractAuthResolverAware implements RealmSimple {
@@ -65,7 +66,7 @@ public class SimpleRealmImpl extends AbstractAuthResolverAware implements RealmS
     public final AuthenticationInfo getAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException, ClassCastException {
         //调用初始化方法
         authenticationInfoFilter.init();
-        authenticationTokenCheck(authenticationToken);
+        assertAuthenticationToken(authenticationToken);
         AuthenticationInfo authenticationInfo = authenticationInfoFilter.doGetAuthenticationInfo(authenticationToken);
         authenticationInfoFilter.doCredentialsMatch(authenticationToken, authenticationInfo);
         //调用销毁方法
@@ -80,7 +81,7 @@ public class SimpleRealmImpl extends AbstractAuthResolverAware implements RealmS
      * @param authenticationToken 认证令牌
      */
 
-    private void authenticationTokenCheck(AuthenticationToken authenticationToken) {
+    private void assertAuthenticationToken(AuthenticationToken authenticationToken) {
         if (!(authenticationToken instanceof IAuthenticationTokenImpl)) {
             logger.info("不是理想的类,应该继承 类 IAuthenticationTokenImpl");
             throw new ClassCastException("不是理想的类");

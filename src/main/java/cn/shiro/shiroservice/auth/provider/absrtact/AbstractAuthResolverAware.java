@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
  * &#064;Time 2024 一月 星期五 09:24
  *
  * @author ShangGuan
+ *
  */
 public abstract class AbstractAuthResolverAware implements AuthResolverAware {
 
