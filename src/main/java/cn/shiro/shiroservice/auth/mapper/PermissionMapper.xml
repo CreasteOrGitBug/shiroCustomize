@@ -5,10 +5,10 @@
     <select id="getPermission" resultType="java.lang.String">
         select permission.permiss
         from sys_user as user
-         inner join sys_user_role as user_role on user_role.uid = user.id
-            inner join sys_role as role on role.id = user_role.rid
-            inner join sys_role_permission as role_permission on role_permission.id = user_role.rid
-            inner join sys_permission as permission on permission.id = role_permission.pid
+        inner join sys_user_role as user_role on user_role.uid = user.id
+        inner join sys_role as role on role.id = user_role.rid
+        inner join sys_role_permission as role_permission on role_permission.id = user_role.rid
+        inner join sys_permission as permission on permission.id = role_permission.pid
         <where>
             user.username = #{username}
             and user.is_delete = 0
@@ -17,25 +17,49 @@
     <select id="getRole" resultType="java.lang.String">
         select role.name
         from sys_user as user
-         inner join sys_user_role as user_role on user_role.uid = user.id
-            inner join sys_role as role on role.id = user_role.rid
-            inner join sys_role_permission as role_permission on role_permission.id = user_role.rid
-            inner join sys_permission as permission on permission.id = role_permission.pid
+        inner join sys_user_role as user_role on user_role.uid = user.id
+        inner join sys_role as role on role.id = user_role.rid
+        inner join sys_role_permission as role_permission on role_permission.id = user_role.rid
+        inner join sys_permission as permission on permission.id = role_permission.pid
         <where>
             user.username = #{username}
             and user.is_delete = 0
         </where>
     </select>
     <select id="getPermissionDTO" resultType="cn.shiro.shiroservice.auth.pojo.dto.PermissionDTO">
-        select user.username as username,role.name as roleName,permission.name as permissionName,permission.permiss as permission
+        select user.username as username,role.name as roleName,permission.name as permissionName,permission.permiss as
+        permission
         from sys_user as user
-         inner join sys_user_role as user_role on user_role.uid = user.id
-            inner join sys_role as role on role.id = user_role.rid
-            inner join sys_role_permission as role_permission on role_permission.id = user_role.rid
-            inner join sys_permission as permission on permission.id = role_permission.pid
+        inner join sys_user_role as user_role on user_role.uid = user.id
+        inner join sys_role as role on role.id = user_role.rid
+        inner join sys_role_permission as role_permission on role_permission.id = user_role.rid
+        inner join sys_permission as permission on permission.id = role_permission.pid
         <where>
             user.username = #{username}
             and user.is_delete = 0
+        </where>
+    </select>
+    <select id="getPermissionStrByRole" resultType="java.lang.String">
+        select permission.permiss
+        from sys_role as role
+        inner join sys_role_permission as role_permission on role.id = role_permission.rid
+        inner join sys_permission as permission on permission.id = role_permission.pid
+        <where>
+            role.name = #{roleName}
+            and role.is_delete = 0
+        </where>
+    </select>
+
+    <select id="getPermissionStrByRoles" resultType="java.lang.String">
+        select permission.permiss
+        from sys_role as role
+        inner join sys_role_permission as role_permission on role.id = role_permission.rid
+        inner join sys_permission as permission on permission.id = role_permission.pid
+        <where>
+        <foreach collection="roleNames" item="roleName" separator="," open=" role.name in("  close=")">
+            #{roleName}
+        </foreach>
+            and role.is_delete = 0
         </where>
     </select>
 </mapper>

@@ -4,6 +4,7 @@ import cn.shiro.shiroservice.auth.mapper.ISubjectDaoMapper;
 import cn.shiro.shiroservice.auth.mapper.UserMapper;
 import cn.shiro.shiroservice.auth.provider.interfaces.AuthenticationInfoFilter;
 import cn.shiro.shiroservice.auth.provider.interfaces.impl.DefaultAuthPermission;
+import cn.shiro.shiroservice.auth.provider.interfaces.impl.DefaultRolePermissionResolver;
 import cn.shiro.shiroservice.auth.provider.interfaces.impl.SimpleAuthenticationInfoFilter;
 import cn.shiro.shiroservice.auth.provider.interfaces.impl.SimpleRealmImpl;
 import cn.shiro.shiroservice.auth.service.impl.ISessionManager;
@@ -36,11 +37,12 @@ public class BeanConfig {
     private UserMapper userMapper;
     @Resource
     private DefaultAuthPermission defaultAuthPermission;
-
+    @Resource
+    private DefaultRolePermissionResolver defaultRolePermissionResolver;
 
     @Bean("iRealmImpl")
     public SimpleRealmImpl getIRealmImpl(){
-        return new SimpleRealmImpl(defaultAuthPermission, new SimpleAuthenticationInfoFilter(userMapper,null));
+        return new SimpleRealmImpl(defaultAuthPermission,defaultRolePermissionResolver,new SimpleAuthenticationInfoFilter(userMapper,null));
     }
 
 

@@ -5,6 +5,7 @@ import cn.shiro.shiroservice.auth.mapper.ISubjectDaoMapper;
 import cn.shiro.shiroservice.auth.mapper.UserMapper;
 import cn.shiro.shiroservice.auth.pojo.User;
 import cn.shiro.shiroservice.auth.pojo.vo.out.UserInfoOutVo;
+import cn.shiro.shiroservice.auth.provider.interfaces.impl.IAuthenticationTokenImpl;
 import cn.shiro.shiroservice.common.enums.SexEnum;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -48,9 +49,10 @@ class ShiroServiceApplicationTests {
     public void auth(){
         SecurityUtils.setSecurityManager(securityManager);
         Subject subject = SecurityUtils.getSubject();
-        UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken("sda", "sad");
+        IAuthenticationTokenImpl usernamePasswordToken = new IAuthenticationTokenImpl("admin", "admin");
         subject.login(usernamePasswordToken);
         subject.logout();
+
         boolean admin = subject.hasRole("admin");
         System.out.println(admin);
     }

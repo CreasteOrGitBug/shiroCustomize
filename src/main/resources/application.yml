@@ -16,3 +16,5 @@ shiro:
   #当用户访问某个需要登录的功能时，但是被shiro内置的过滤器拦截后，判断本次请求
   #没有登录，而是直接访问的，则重定向到loginUrl的路径资源响应给用户
   loginUrl: /login
+  println:
+    is-enable: true #开启shiro拦截器打印

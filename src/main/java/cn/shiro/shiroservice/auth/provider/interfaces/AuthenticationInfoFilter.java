@@ -13,7 +13,7 @@ import org.apache.shiro.authc.credential.CredentialsMatcher;
  * @author ShangGuan
  * &#064;date  2024/01/12
  */
-public interface AuthenticationInfoFilter  {
+public interface AuthenticationInfoFilter {
 
     /**
      * 身份验证的初始化  在开始的时候调用
@@ -56,8 +56,8 @@ public interface AuthenticationInfoFilter  {
     void doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) throws AuthenticationException;
 
 
-        /**
-         * 身份验证的销毁方法 在结束的时候调用
-         */
-        void destroyed ();
-    }
+    /**
+     * 身份验证的销毁方法 在结束的时候调用
+     */
+    void destroyed();
+}

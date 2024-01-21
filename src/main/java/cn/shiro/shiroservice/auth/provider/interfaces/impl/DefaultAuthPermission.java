@@ -90,7 +90,7 @@ public class DefaultAuthPermission implements AuthPermissionFilter {
         //获取权限
         simpleAuthorizationInfo.setStringPermissions(checkStrSuperAuth(permissionSet));
         simpleAuthorizationInfo.setObjectPermissions(checkSuperAuth(permissionSet));
-        logger.info("权限设置完毕,{}", permissionSet);
+        logger.info("用户权限为,{}", permissionSet);
         return simpleAuthorizationInfo;
     }
 

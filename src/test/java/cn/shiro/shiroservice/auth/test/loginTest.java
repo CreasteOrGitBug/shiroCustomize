@@ -8,11 +8,14 @@ import org.apache.shiro.mgt.DefaultSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.web.filter.mgt.DefaultFilterChainManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
+import javax.servlet.Filter;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * &#064;Time 2024 一月 星期四 16:26
@@ -48,7 +51,14 @@ public class loginTest {
         boolean[] permitted = subject.isPermitted("super_admin", "CHAO");
         boolean asd = subject.isPermittedAll("asd");
         boolean admin = subject.isPermittedAll("super_admin","ads"); //传入俩个没有权限
+        boolean admin1 = subject.hasRole("admin");
+        boolean admin2 = subject.hasRole("admin2");
+
         System.out.println(permitted);
+    }
+
+    @Test
+    public void printlnClassFilter(){
     }
 
 

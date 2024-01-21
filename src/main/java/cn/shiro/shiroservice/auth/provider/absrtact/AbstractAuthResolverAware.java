@@ -1,31 +1,26 @@
 package cn.shiro.shiroservice.auth.provider.absrtact;
 
 import cn.shiro.shiroservice.auth.provider.interfaces.AuthPermissionFilter;
-import cn.shiro.shiroservice.auth.provider.interfaces.AuthResolverAware;
 import cn.shiro.shiroservice.common.utils.BooleanUtils;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.permission.PermissionResolver;
 import org.apache.shiro.authz.permission.RolePermissionResolver;
-import org.apache.shiro.authz.permission.WildcardPermissionResolver;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * &#064;Time 2024 一月 星期五 09:24
+ * &#064;Time 2024 一月 星期四 17:09
  *
  * @author ShangGuan
- *
  */
-public abstract class AbstractAuthResolverAware implements AuthResolverAware {
+public abstract class AbstractAuthResolverAware extends AbstractCacheAware {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractAuthResolverAware.class);
 
@@ -33,36 +28,12 @@ public abstract class AbstractAuthResolverAware implements AuthResolverAware {
 
     private RolePermissionResolver rolePermissionResolver;
 
-
-    private final AuthPermissionFilter authPermissionFilter;
-
-    protected AbstractAuthResolverAware(AuthPermissionFilter authPermissionFilter) {
-        this(null, null, authPermissionFilter);
+    protected AbstractAuthResolverAware(PermissionResolver permissionResolver, RolePermissionResolver rolePermissionResolver, AuthPermissionFilter authPermissionFilter) {
+        super(authPermissionFilter);
+        this.permissionResolver = permissionResolver;
+        this.rolePermissionResolver = rolePermissionResolver;
     }
 
-    protected AbstractAuthResolverAware(RolePermissionResolver rolePermissionResolver, AuthPermissionFilter authPermissionFilter) {
-        this(null, rolePermissionResolver, authPermissionFilter);
-    }
-
-    protected AbstractAuthResolverAware(PermissionResolver permissionResolver, AuthPermissionFilter authPermissionFilter) {
-        this(permissionResolver, null, authPermissionFilter);
-
-    }
-
-    protected AbstractAuthResolverAware(PermissionResolver permissionResolver
-            , RolePermissionResolver rolePermissionResolver,
-                                        AuthPermissionFilter authPermissionFilter
-    ) {
-        if (permissionResolver != null) {
-            this.permissionResolver = permissionResolver;
-        } else {
-            this.permissionResolver = new WildcardPermissionResolver();
-        }
-        if (rolePermissionResolver != null) {
-            this.rolePermissionResolver = rolePermissionResolver;
-        }
-        this.authPermissionFilter = authPermissionFilter;
-    }
 
     @Override
     public void setPermissionResolver(PermissionResolver resolver) {
@@ -101,7 +72,7 @@ public abstract class AbstractAuthResolverAware implements AuthResolverAware {
      */
 
     protected boolean assertPermission(PrincipalCollection savePrincipalCollection, Permission submitPermission) {
-        AuthorizationInfo authorizationInfo = authPermissionFilter.doGetAuthorizationInfo(savePrincipalCollection);
+        AuthorizationInfo authorizationInfo = super.getAuthPermissionFilter().doGetAuthorizationInfo(savePrincipalCollection);
         if (authorizationInfo == null) return false;
         //拿到要需要比较的权限
         Collection<Permission> checkPermission = authorizationInfo.getObjectPermissions();
@@ -126,6 +97,8 @@ public abstract class AbstractAuthResolverAware implements AuthResolverAware {
     }
 
     protected boolean assertPermission(PrincipalCollection savePrincipalCollection, Collection<Permission> submitPermission) {
+        if (CollectionUtils.isEmpty(submitPermission)) return false;
+        if (savePrincipalCollection == null) return false;
         List<Permission> permissions = new ArrayList<>(submitPermission);
         boolean[] booleans = assertPermission(savePrincipalCollection, permissions);
         for (boolean aBoolean : booleans) {
@@ -147,10 +120,10 @@ public abstract class AbstractAuthResolverAware implements AuthResolverAware {
 
     protected boolean[] assertPermission(PrincipalCollection savePrincipalCollection, List<Permission> submitPermissions) {
         List<Boolean> result = new ArrayList<>();
-        AuthorizationInfo authorizationInfo = authPermissionFilter.doGetAuthorizationInfo(savePrincipalCollection);
+
+        AuthorizationInfo authorizationInfo = super.getAuthPermissionFilter().doGetAuthorizationInfo(savePrincipalCollection);
         //当AuthorizationInfo==null的时候默认返回false
         if (authorizationInfo == null) return BooleanUtils.newBooleanSize(submitPermissions.size(), false);
-
         //拿到要需要比较的权限
         List<Permission> checkPermission = new ArrayList<>(authorizationInfo.getObjectPermissions());
         //检查的权限下标
@@ -240,32 +213,69 @@ public abstract class AbstractAuthResolverAware implements AuthResolverAware {
 
     @Override
     public boolean hasRole(PrincipalCollection subjectPrincipal, String roleIdentifier) {
-        return false;
+        Collection<Permission> submitPermission = rolePermissionResolver.resolvePermissionsInRole(roleIdentifier);
+        return assertPermission(subjectPrincipal, submitPermission);
     }
 
     @Override
     public boolean[] hasRoles(PrincipalCollection subjectPrincipal, List<String> roleIdentifiers) {
-        return new boolean[0];
+        List<Permission> resultArray = new ArrayList<>();
+        for (String roleIdentifier : roleIdentifiers) {
+            Collection<Permission> permissions = rolePermissionResolver.resolvePermissionsInRole(roleIdentifier);
+            resultArray.addAll(permissions);
+        }
+
+        return assertPermission(subjectPrincipal, resultArray);
     }
 
     @Override
     public boolean hasAllRoles(PrincipalCollection subjectPrincipal, Collection<String> roleIdentifiers) {
+        List<Permission> resultArray = new ArrayList<>();
+        for (String roleIdentifier : roleIdentifiers) {
+            Collection<Permission> permissions = rolePermissionResolver.resolvePermissionsInRole(roleIdentifier);
+            resultArray.addAll(permissions);
+        }
+        if (CollectionUtils.isEmpty(resultArray)) return false;
+        if (subjectPrincipal == null) return false;
+        List<Permission> permissions = new ArrayList<>(resultArray);
+        boolean[] booleans = assertPermission(subjectPrincipal, permissions);
+        for (boolean aBoolean : booleans) {
+            if (aBoolean) {
+                return true;
+            }
+        }
         return false;
     }
 
     @Override
-    public void checkRole(PrincipalCollection subjectPrincipal, String roleIdentifier) throws AuthorizationException {
-
+    public void checkRole(PrincipalCollection subjectPrincipal, String roleIdentifier) throws
+            AuthorizationException {
+        if (!hasRole(subjectPrincipal, roleIdentifier)) {
+            logger.warn("User not use auth,{}", roleIdentifier);
+            throw new AuthorizationException("not use permission");
+        }
     }
 
     @Override
-    public void checkRoles(PrincipalCollection subjectPrincipal, Collection<String> roleIdentifiers) throws AuthorizationException {
-
+    public void checkRoles(PrincipalCollection subjectPrincipal, Collection<String> roleIdentifiers) throws
+            AuthorizationException {
+        boolean[] booleans = hasRoles(subjectPrincipal, (List<String>) roleIdentifiers);
+        if (BooleanUtils.hasBooleanTrue(booleans)) {
+            logger.warn("User not use auth,{}", roleIdentifiers);
+            throw new AuthorizationException("not use permission");
+        }
     }
 
     @Override
-    public void checkRoles(PrincipalCollection subjectPrincipal, String... roleIdentifiers) throws AuthorizationException {
+    public void checkRoles(PrincipalCollection subjectPrincipal, String... roleIdentifiers) throws
+            AuthorizationException {
+        List<String> roleIdentifierArray = Arrays.stream(roleIdentifiers).collect(Collectors.toList());
+        boolean[] booleans = hasRoles(subjectPrincipal, roleIdentifierArray);
+        if (BooleanUtils.hasBooleanTrue(booleans)) {
+            logger.warn("User not use auth,{}", roleIdentifierArray);
+            throw new AuthorizationException("not use permission");
+        }
 
     }
-
 }
+

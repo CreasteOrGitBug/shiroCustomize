@@ -42,4 +42,17 @@ public interface PermissionMapper {
      */
 
     List<PermissionDTO> getPermissionDTO(@Param("username") String username);
+
+
+    /**
+     * 按角色获取权限字符
+     *
+     * @param roleName 角色名称
+     * @return {@link List}<{@link String}>
+     */
+
+    List<String> getPermissionStrByRole(@Param("roleName") String roleName);
+
+    List<String> getPermissionStrByRoles(@Param("roleNames") List<String> roleNames);
+
 }

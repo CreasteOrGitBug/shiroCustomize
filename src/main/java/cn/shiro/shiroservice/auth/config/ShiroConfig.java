@@ -42,7 +42,6 @@ public class ShiroConfig {
         sessionManager.setSessionDAO(iSessionManager);
         //设置SessionManager
         securityManager.setSessionManager(sessionManager);
-
         return securityManager;
     }
 

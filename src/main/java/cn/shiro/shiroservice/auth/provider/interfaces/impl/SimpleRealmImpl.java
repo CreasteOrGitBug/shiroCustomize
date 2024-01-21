@@ -1,12 +1,13 @@
 package cn.shiro.shiroservice.auth.provider.interfaces.impl;
 
 import cn.hutool.core.util.IdUtil;
+import cn.shiro.shiroservice.auth.provider.absrtact.AbstractAuthResolverAware;
 import cn.shiro.shiroservice.auth.provider.interfaces.AuthPermissionFilter;
 import cn.shiro.shiroservice.auth.provider.interfaces.AuthenticationInfoFilter;
 import cn.shiro.shiroservice.auth.provider.interfaces.RealmSimple;
-import cn.shiro.shiroservice.auth.provider.absrtact.AbstractAuthResolverAware;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authc.pam.UnsupportedTokenException;
+import org.apache.shiro.authz.permission.WildcardPermissionResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +30,9 @@ public class SimpleRealmImpl extends AbstractAuthResolverAware implements RealmS
 
 
 
-    public SimpleRealmImpl(AuthPermissionFilter authPermissionFilter, AuthenticationInfoFilter authenticationInfoFilter) {
-        super(authPermissionFilter);
+    public SimpleRealmImpl(AuthPermissionFilter authPermissionFilter,DefaultRolePermissionResolver defaultRolePermissionResolver, AuthenticationInfoFilter authenticationInfoFilter) {
+        super(new WildcardPermissionResolver(),defaultRolePermissionResolver,authPermissionFilter);
+
         this.authenticationInfoFilter = authenticationInfoFilter;
     }
 
@@ -86,7 +88,6 @@ public class SimpleRealmImpl extends AbstractAuthResolverAware implements RealmS
             logger.info("不是理想的类,应该继承 类 IAuthenticationTokenImpl");
             throw new ClassCastException("不是理想的类");
         }
-
     }
 
 

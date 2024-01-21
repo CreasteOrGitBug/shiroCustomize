@@ -78,6 +78,7 @@ public class SimpleAuthenticationInfoFilter implements AuthenticationInfoFilter 
     public void destroyed() {
         logger.info("身份验证结束,{}", System.currentTimeMillis());
     }
+
     /**
      * 设置凭据匹配器  默认HashedCredentialsMatcher
      * 如果需要别的比较方式 需要继承重写 TODO 后续这里会重构 避免代码重复
